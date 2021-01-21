@@ -7,7 +7,7 @@ function App() {
       <header className="App-header">
         <div className="container">
           <div className="row">
-            <Ventas />
+              <Ventas />
           </div>
         </div>
       </header>
