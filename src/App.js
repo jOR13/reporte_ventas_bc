@@ -6,7 +6,7 @@ function App() {
     <div className="App">
       <header className="App-header">
         <div className="container">
-          <div className="row">
+          <div className="row justify-content-center">
               <Ventas />
           </div>
         </div>

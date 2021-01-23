@@ -3,63 +3,31 @@ import axios from "axios";
 import Chart from "./Chart";
 
 function Ventas() {
-  let hoy = new Date();
+  var today = new Date();
+  var dd = String(today.getDate()).padStart(2, "0");
+  var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
+  var yyyy = today.getFullYear();
 
+  today = yyyy + "-" + mm + "-" + dd;
+  console.log(today);
+
+  let hoy = new Date();
   const [datos, setDatos] = useState([]);
-  const [date, setDate] = useState(hoy.toISOString().slice(0, 10));
   const [promedio, setPromedio] = useState("");
+  // const [date, setDate] = useState(hoy.toISOString().slice(0, 10));
+  const [date, setDate] = useState(today);
   const [promedioAcum, setPromedioAcum] = useState("");
   const [filtro, setFiltro] = useState(0);
   const [sumatoria, setSumatoria] = useState(0);
 
-  useEffect(() => {
-    // readWSDia();
+  // console.log(hoy);
 
+  useEffect(() => {
     readWsAcumluado();
   }, [date]);
 
   const onChangeDate = (e) => {
     setDate(e.target.value);
-  };
-
-  const readWSDia = async () => {
-    const username = "ADMINGLOBAL";
-    const password = "fVl4j9CNddUK+EKLpZ/vOc59Sj8FPQ+JxtVcmn0EGPU=";
-    const token = Buffer.from(`${username}:${password}`, "utf8").toString(
-      "base64"
-    );
-
-    const filtro = `?$filter=Posting_Date eq ${date}`;
-    // const filtro = "";
-
-    const url =
-      "https://api.businesscentral.dynamics.com/v2.0/0acf03fd-2058-4005-bc16-b2184931a7bc/Production/ODataV4/Company('COMERCIALIZADORA%20DE%20COMBUSTIBL')/Query_Ventas" +
-      filtro;
-    // const data = {};
-
-    const respuesta = await axios.get(url, {
-      headers: {
-        Authorization: `Basic ${token}`,
-      },
-    });
-
-    setDatos(respuesta.data.value);
-
-    // console.log(respuesta.data.value);
-
-    let suma = 0;
-
-    for (let i = 0; i < respuesta.data.value.length; i++) {
-      respuesta.data.value[i].Precio =
-        respuesta.data.value[i].Sales_Amount__Actual_ /
-        respuesta.data.value[i].Quantity;
-      suma +=
-        respuesta.data.value[i].Sales_Amount__Actual_ /
-        respuesta.data.value[i].Quantity;
-    }
-
-    setPromedio(suma / respuesta.data.value.length);
-    setSumatoria(suma);
   };
 
   const readWsAcumluado = async () => {
@@ -127,20 +95,14 @@ function Ventas() {
   return (
     <>
       {" "}
-      <div className="col-md-12">
-        <div>
-          <input
-            type="date"
-            className="form-control mt-4 mb-4"
-            placeholder="Fecha ejemplo: 2020-12-01"
-            value={date}
-            onChange={onChangeDate}
-          />
-        </div>
-        {/* <button className="btn btn-warning" onClick={(e) => readWsAcumluado(e)}>
-          Promedio acumulado
-        </button> */}
-        {/* //  Sumatoria: {Math.abs(sumatoria).toFixed(2)}  */}
+      <div className="col-md-6">
+        <input
+          type="date"
+          className="form-control mt-4 mb-4"
+          placeholder="Fecha ejemplo: 2020-12-01"
+          value={date}
+          onChange={onChangeDate}
+        />
       </div>
       {datos.length > 0 ? (
         <div>
@@ -150,16 +112,20 @@ function Ventas() {
               <div
                 className="card"
                 style={{
-                  width: "18rem",
+                  width: "20rem",
+                  height: "6rem",
+                  backgroundColor: "rgba(255, 99, 132, 0.2)",
                   color: "black",
+                  border: "1px solid",
+                  borderColor: "rgba(255, 99, 132, 1)",
                   font: "-webkit-small-control",
                 }}
               >
                 <div className="card-body">
-                  <b>Promedio del precio acumulado:</b>
+                  <b>Promedio precio de venta acumulado:</b>
                   <h3>
                     {" "}
-                    <b>{Math.abs(promedio).toFixed(2)}</b>
+                    <b>$ {Math.abs(promedio).toFixed(2)}</b>
                   </h3>
                 </div>
               </div>
@@ -168,23 +134,39 @@ function Ventas() {
               <div
                 className="card"
                 style={{
-                  width: "18rem",
+                  width: "20rem",
+                  border: "1px solid",
+                  borderColor: "rgba(255, 99, 132, 1)",
+                  height: "6rem",
                   color: "black",
+                  backgroundColor: "rgba(255, 99, 132, 0.2)",
                   font: "-webkit-small-control",
                 }}
               >
                 <div className="card-body">
-                  <b>Promedio del precio al dia: {date}</b>
-                  <h3>
-                    {" "}
-                    <b>{Math.abs(promedioAcum).toFixed(2)}</b>
-                  </h3>
+                  {!promedioAcum ? (
+                    <div>
+                      <b>Promedio precio de venta al dia: {date}</b>
+                      <h3>
+                        {" "}
+                        <b> $ 0.00</b>
+                      </h3>
+                    </div>
+                  ) : (
+                    <div>
+                      <b>Promedio precio de venta al dia: {date}</b>
+                      <h3>
+                        {" "}
+                        <b>$ {Math.abs(promedioAcum).toFixed(2)}</b>
+                      </h3>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
             <div className="col-md-3"></div>
           </div>
-          <div className="col-md-12">
+          <div className="col-md-12 mt-4">
             <Chart datos={datos} />
             {/* <Radar /> */}
           </div>
@@ -194,6 +176,8 @@ function Ventas() {
                 borderCollapse: "collapse",
                 borderSpacing: 0,
                 width: "100%",
+                fontFamily: "Helvetica",
+                fontSize: "15px",
                 whiteSpace: "nowrap",
                 color: "white",
               }}
@@ -230,10 +214,50 @@ function Ventas() {
           </div>
         </div>
       ) : (
-        <h1>No se han encontrado ventas</h1>
+        <h1>No se han encontrado datos</h1>
       )}
     </>
   );
 }
 
 export default Ventas;
+
+// const readWSDia = async () => {
+//   const username = "ADMINGLOBAL";
+//   const password = "fVl4j9CNddUK+EKLpZ/vOc59Sj8FPQ+JxtVcmn0EGPU=";
+//   const token = Buffer.from(`${username}:${password}`, "utf8").toString(
+//     "base64"
+//   );
+
+//   const filtro = `?$filter=Posting_Date eq ${date}`;
+//   // const filtro = "";
+
+//   const url =
+//     "https://api.businesscentral.dynamics.com/v2.0/0acf03fd-2058-4005-bc16-b2184931a7bc/Production/ODataV4/Company('COMERCIALIZADORA%20DE%20COMBUSTIBL')/Query_Ventas" +
+//     filtro;
+//   // const data = {};
+
+//   const respuesta = await axios.get(url, {
+//     headers: {
+//       Authorization: `Basic ${token}`,
+//     },
+//   });
+
+//   setDatos(respuesta.data.value);
+
+//   // console.log(respuesta.data.value);
+
+//   let suma = 0;
+
+//   for (let i = 0; i < respuesta.data.value.length; i++) {
+//     respuesta.data.value[i].Precio =
+//       respuesta.data.value[i].Sales_Amount__Actual_ /
+//       respuesta.data.value[i].Quantity;
+//     suma +=
+//       respuesta.data.value[i].Sales_Amount__Actual_ /
+//       respuesta.data.value[i].Quantity;
+//   }
+
+//   setPromedio(suma / respuesta.data.value.length);
+//   setSumatoria(suma);
+// };

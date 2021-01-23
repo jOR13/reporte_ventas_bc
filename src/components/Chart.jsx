@@ -71,7 +71,7 @@ function Chart({ datos }) {
       {datos.length > 0 ? (
         <div>
           <div className="header">
-            <h1 className="title">Precios de venta al dia</h1>
+            <h1 className="title">Promedio de precios de venta por dia</h1>
             <div className="links"></div>
           </div>
           <Bar data={data} options={options} />
